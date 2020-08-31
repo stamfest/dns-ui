@@ -148,3 +148,4 @@ class UserDirectory extends DBDirectory {
 class UserNotFoundException extends Exception {}
 class UserDataSourceException extends Exception {}
 class UserAlreadyExistsException extends Exception {}
+class PasswordComplexityException extends Exception {}

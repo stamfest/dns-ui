@@ -17,7 +17,8 @@
 
 function is_form_authenticated() {
 	global $config;
-	if ($config['authentication']['form_based'] == "ldap") {
+	if (($config['authentication']['form_based'] == "ldap") || 
+	    ($config['authentication']['form_based'] == "database")) {
 		if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
 			return true;
 		}
@@ -61,6 +62,37 @@ function auth_by_ldap($user, $pass) {
 			   );
 }
 
+function auth_by_database($user, $pass) {
+	global $database;
+
+	$stmt = $database->prepare('SELECT password FROM "user" WHERE uid = ?');
+	$stmt->bindParam(1, $user, PDO::PARAM_STR);
+	$stmt->execute();
+
+	if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+		return password_verify($pass, $row['password']);
+	} else {
+		/* ugly ... if there are no users in the database then allow 
+		   login with ANY credentials and add user to the database.... */
+		
+		$stmt = $database->prepare('SELECT count(1) AS count FROM "user"');
+		$stmt->execute();
+		if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+			if ($row['count'] == 0) {
+				$hash = password_hash($pass, PASSWORD_DEFAULT);
+
+				$stmt = $database->prepare('INSERT INTO "user" (uid, password,active,admin) VALUES (?,?,1,1)');
+				$stmt->bindParam(1, $user, PDO::PARAM_STR);
+				$stmt->bindParam(2, $hash, PDO::PARAM_STR);
+				$stmt->execute();
+				return true;
+			}
+		}
+
+		return false;
+	}
+}
+
 if ($config['authentication']['form_based'] !== false) {
 	dns_ui_start_session();
 	if (! isset($_SESSION['loggedin']) || ! $_SESSION['loggedin']) {
@@ -74,6 +106,8 @@ if ($config['authentication']['form_based'] !== false) {
 					// other authentication methods could be implemented here...
 					if ($config['authentication']['form_based'] == "ldap") {
 						$authed = auth_by_ldap($_POST['username'], $_POST['password']);
+					} else if ($config['authentication']['form_based'] == "database") {
+						$authed = auth_by_database($_POST['username'], $_POST['password']);
 					}
 
 					if ($authed) {

@@ -18,6 +18,7 @@ $active_user = $this->get('active_user');
 $user = $this->get('user');
 $changesets = $this->get('changesets');
 global $output_formatter;
+global $config;
 ?>
 <h1><span class="glyphicon glyphicon-user" title="User"></span> <?php out($user->name)?> <small>(<?php out($user->uid)?>)</small></h1>
 <h2>User details</h2>
@@ -42,6 +43,21 @@ global $output_formatter;
 			<input type="email" class="form-control" id="email" name="email" required maxlength="255" value="<?php out($user->email)?>">
 		</div>
 	</div>
+	<?php if ($config['authentication']['form_based'] == "database") { ?>
+		<div class="form-group">
+			<label for="password1" class="col-sm-2 control-label">Password (will be changed if non-empty)</label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" id="password1" name="password1" maxlength="255">
+			</div>
+		</div>
+		<div class="form-group">
+			<label for="password2" class="col-sm-2 control-label">Password (repeat)</label>
+			<div class="col-sm-10">
+				<input type="password" class="form-control" id="password2" name="password2" maxlength="255">
+			</div>
+		</div>
+	<?php } ?>
+
 	<div class="form-group">
 		<label class="col-sm-2 control-label">Status</label>
 		<div class="col-sm-10">

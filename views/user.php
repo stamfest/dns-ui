@@ -24,6 +24,28 @@ try {
 
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
 	if(isset($_POST['update_user']) && $active_user->admin) {
+		if ($config['authentication']['form_based'] == "database") {
+			if ($_POST['password1'] !== $_POST['password2']) {
+				$alert = new UserAlert;
+				$alert->content = "Passwords do not match";
+				$alert->class = 'danger';
+				$active_user->add_alert($alert);
+				redirect();
+			}
+			if ($_POST['password1'] !== '') {
+				try {
+					if ($user->is_password_complexity_ok($_POST['password1'])) {
+						$user->password = password_hash($_POST['password1'], PASSWORD_DEFAULT);
+					}
+				} catch(PasswordComplexityException $e) {
+					$alert = new UserAlert;
+					$alert->content = $e->getMessage();
+					$alert->class = 'danger';
+					$active_user->add_alert($alert);
+					redirect();
+				}
+			}
+		}
 		$user->name = $_POST['name'];
 		$user->email = $_POST['email'];
 		$user->active = isset($_POST['active']) ? 1 : 0;

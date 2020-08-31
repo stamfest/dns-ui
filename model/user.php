@@ -106,7 +106,9 @@ class User extends Record {
 	*/
 	public function get_details() {
 		global $config;
-		if(!empty($config['ldap']['enabled'])) {
+		if($config['authentication']['form_based'] === "database") {
+			$this->get_details_from_database();
+		} else if(!empty($config['ldap']['enabled'])) {
 			$this->get_details_from_ldap();
 		} elseif(!empty($config['php_auth']['enabled'])) {
 			$this->get_details_from_php_auth();
@@ -133,6 +135,27 @@ class User extends Record {
 			}
 		} else {
 			throw new UserNotFoundException('User does not exist in PHP_AUTH variables.');
+		}
+	}
+
+	/**
+	* Retrieve this user's details from the database.
+	* @throws UserNotFoundException if the user is not found in the database.
+	*/
+
+	public function get_details_from_database() {
+                $stmt = $this->database->prepare('SELECT * FROM "user" WHERE uid = ?');
+                $stmt->bindParam(1, $this->uid, PDO::PARAM_STRING);
+                $stmt->execute();
+
+		if ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+			$this->auth_realm = $row['auth_realm'];
+			$this->name = $row['name'];
+			$this->email = $row['email'];
+			$this->active = $row['active'];
+			$this->admin = $row['admin'];
+		} else {
+			throw new UserNotFoundException('User does not exist in database.');
 		}
 	}
 
@@ -266,5 +289,15 @@ class User extends Record {
 			$changesets[] = new ChangeSet($row['id'], $row);
 		}
 		return $changesets;
+	}
+
+	public function is_password_complexity_ok($pass) {
+		global $config;
+		$ok = (strlen($pass) >= $config['authentication']['password_min_length']);
+
+		if (!$ok) {
+			throw new PasswordComplexityException('Password is too short');
+		}
+		return $ok;
 	}
 }

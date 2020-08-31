@@ -14,7 +14,9 @@
 ## See the License for the specific language governing permissions and
 ## limitations under the License.
 ##
+global $config;
 $users = $this->get('users');
+$newuser = $this->get('newuser');
 ?>
 <h1>Users</h1>
 <ul class="nav nav-tabs" role="tablist">
@@ -57,26 +59,40 @@ $users = $this->get('users');
 			<div class="form-group">
 				<label for="uid" class="col-sm-2 control-label">User ID</label>
 				<div class="col-sm-10">
-					<input type="text" class="form-control" id="uid" name="uid" required pattern=".*\S+.*" maxlength="255">
+					<input type="text" class="form-control" id="uid" name="uid" required pattern=".*\S+.*" maxlength="255" value="<?php out($newuser->uid)?>">
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="name" class="col-sm-2 control-label">Full name</label>
 				<div class="col-sm-10">
-					<input type="text" class="form-control" id="name" name="name" required pattern=".*\S+.*" maxlength="255">
+					<input type="text" class="form-control" id="name" name="name" required pattern=".*\S+.*" maxlength="255" value="<?php out($newuser->name)?>">
 				</div>
 			</div>
 			<div class="form-group">
 				<label for="email" class="col-sm-2 control-label">Email address</label>
 				<div class="col-sm-10">
-					<input type="email" class="form-control" id="email" name="email" required maxlength="255">
+					<input type="email" class="form-control" id="email" name="email" required maxlength="255" value="<?php out($newuser->email)?>">
 				</div>
 			</div>
+			<?php if ($config['authentication']['form_based'] == "database") { ?>
+				<div class="form-group">
+					<label for="password1" class="col-sm-2 control-label">Password</label>
+					<div class="col-sm-10">
+						<input type="password" class="form-control" id="password1" name="password1" required maxlength="255">
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="password2" class="col-sm-2 control-label">Password (repeat)</label>
+					<div class="col-sm-10">
+						<input type="password" class="form-control" id="password2" name="password2" required maxlength="255">
+				</div>
+			</div>
+			<?php } ?>
 			<div class="form-group">
 				<label class="col-sm-2 control-label">Roles</label>
 				<div class="col-sm-10">
 					<div class="checkbox">
-						<label><input type="checkbox" id="admin" name="admin">Administrator</label>
+						<label><input type="checkbox" id="admin" name="admin" <?php if ($newuser->admin) {?> checked="checked" <?php }?>>Administrator</label>
 					</div>
 				</div>
 			</div>

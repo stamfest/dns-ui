@@ -43,7 +43,12 @@ class PageSection {
 				$this->data->menu_items['Users'] = '/users';
 				$this->data->menu_items['Settings'] = '/settings';
 			}
-			if ($config['authentication']['form_based']) {
+			if ($config['authentication']['form_based'] === "database") {
+				$you = "You(" . $active_user->uid . ")";
+				$this->data->menu_items[$you] = array();
+				$this->data->menu_items[$you]['Change password'] = '/changepass';
+				$this->data->menu_items[$you]['Log out'] = '/logout';
+			} else if ($config['authentication']['form_based']) {
 				$this->data->menu_items['Log out'] = '/logout';
 			}
 		}

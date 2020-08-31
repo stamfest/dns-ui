@@ -27,6 +27,7 @@ $routes = array(
 	'/templates/{type}' => 'templates',
 	'/templates/{type}/{name}' => 'template',
 	'/users' => 'users',
+	'/changepass' => 'changepass',
 	'/users/{uid}' => 'user',
 	'/zones' => 'zones',
 	'/zones/{name}' => 'zone',
